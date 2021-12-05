@@ -1,4 +1,4 @@
-var markerPlease = [
+let markerPlease = [
     {name:'SP06201220Z', lat:55.881891 ,lng:37.446278, fl: "t"},
     {name:'SP05701220Z', lat:55.601972 ,lng:37.484425, fl: "t"},
     {name:'SP05081220Z', lat:55.647387 ,lng:37.743965, fl: "t"},
@@ -11,14 +11,10 @@ var markerPlease = [
     {name:'SP00461020Z', lat:55.546172,lng:37.584935, fl: "r"},
     {name:'SP00351020Z', lat:55.898174,lng:37.587782, fl: "r"},
 ];
+
+
 let markers = [];
-// var markerPlease2 = [];
-// for (var i = 0; i <= markerPlease.length; i++) {
-//   var latt = markerPlease[i].lat + 0.005;
-//   var lngg = markerPlease[i].lng + 0.005;
-//   markerPlease2.push({lat:latt, lng:lngg})
-// }
-// Initialize and add the map
+
 function initMap() {
     this.markerInfoWindow = new google.maps.InfoWindow({ content: "" });
     this.bounds = new google.maps.LatLngBounds();
@@ -58,17 +54,56 @@ function setDefaultMapLocation() {
     this.map.setCenter(new google.maps.LatLng( 55.755819, 37.617644));
 }
 
+
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
 function addMarkers() {
+
     markerPlease.forEach(center => {
-        markers.push(new google.maps.Marker({
-            position: {lat: center.lat, lng: center.lng},
-            map: null,
-            title: center.name,
-        }))
-    });
+            markers.push(new google.maps.Marker({
+                position: {lat: center.lat, lng: center.lng},
+                map: null,
+                title: center.name,
+            }))
+        markerPlease.forEach(j => {
+                if (center !== j) {
+                    const makersPoly = [center, j];
+                    const flightPath = new google.maps.Polyline({
+                        path: makersPoly,
+                        geodesic: true,
+                        strokeColor: "#00FF00",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                    });
+                    flightPath.setMap(map);
 
-    drawMarkerCluster();
+                    const j1 = {lat: j.lat + 0.00005,lng: j.lng + 0.00005};
+                    const center1 = {lat: center.lat + 0.00005,lng: center.lng + 0.00005};
+                    const makersPoly1 = [center1, j1];
+                    const flightPath1 = new google.maps.Polyline({
+                        path: makersPoly1,
+                        geodesic: true,
+                        strokeColor: "#F00000",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                    });
+                    flightPath1.setMap(map);
+                }
 
+            })
+        });
+
+        drawMarkerCluster();
 }
 
 function drawMarkerCluster() {
